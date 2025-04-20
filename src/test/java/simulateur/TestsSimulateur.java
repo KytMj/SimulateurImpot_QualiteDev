@@ -1,5 +1,6 @@
 package simulateur;
 
+import com.kerware.reusine.simualteur.SimulateurReusine;
 import com.kerware.simulateur.AdaptateurSimulateur;
 import com.kerware.simulateur.ICalculateurImpot;
 import com.kerware.simulateur.SituationFamiliale;
@@ -21,7 +22,7 @@ public class TestsSimulateur {
 
     @BeforeAll
     public static void setUp() {
-        simulateur = new AdaptateurSimulateur();
+        simulateur = new AdaptateurSimulateur(new SimulateurReusine());
     }
 
     public static Stream<Arguments> donneesPartsFoyerFiscal() {

@@ -1,8 +1,10 @@
 package com.kerware.simulateur;
 
+import com.kerware.reusine.simualteur.SimulateurReusine;
+
 public class AdaptateurSimulateur implements ICalculateurImpot {
 
-    private Simulateur simulateur = new Simulateur();
+    private SimulateurReusine simulateur;
 
     private int revenusNetDecl1 = 0;
     private int revenusNetDecl2 = 0;
@@ -11,6 +13,9 @@ public class AdaptateurSimulateur implements ICalculateurImpot {
     private int nbEnfantsSituationHandicap;
     private boolean parentIsole;
 
+    public AdaptateurSimulateur(SimulateurReusine simulateur){
+        this.simulateur = simulateur;
+    }
 
     @Override
     public void setRevenusNetDeclarant1(int rn) {
