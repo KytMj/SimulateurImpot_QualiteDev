@@ -1,8 +1,6 @@
 package com.kerware.reusine.simualteur;
 
 import com.kerware.simulateur.SituationFamiliale;
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
 
 /**
  *  Cette classe permet de simuler le calcul de l'impôt sur le revenu
@@ -10,16 +8,16 @@ import org.apache.commons.logging.LogFactory;
  *  des cas simples de contribuables célibataires, mariés, divorcés, veufs
  *  ou pacsés avec ou sans enfants à charge ou enfants en situation de handicap
  *  et parent isolé.
- *
+ * <p>
  *  EXEMPLE DE CODE DE TRES MAUVAISE QUALITE FAIT PAR UN DEBUTANT
- *
+ * <p>
  *  Pas de lisibilité, pas de commentaires, pas de tests
  *  Pas de documentation, pas de gestion des erreurs
  *  Pas de logique métier, pas de modularité
  *  Pas de gestion des exceptions, pas de gestion des logs
  *  Principe "Single Responsability" non respecté
  *  Pas de traçabilité vers les exigences métier
- *
+ * <p>
  *  Pourtant ce code fonctionne correctement
  *  Il s'agit d'un "legacy" code qui est difficile à maintenir
  *  L'auteur n'a pas fourni de tests unitaires
@@ -27,35 +25,20 @@ import org.apache.commons.logging.LogFactory;
 
 public class SimulateurReusine {
     // Les limites des tranches de revenus imposables
-    private int[] limitesTranchesRevenusImposables = {0, 11294, 28797, 82341, 177106, Integer.MAX_VALUE};
+    private final int[] limitesTranchesRevenusImposables = {0, 11294, 28797, 82341, 177106, Integer.MAX_VALUE};
 
     // Les taux d'imposition par tranche
-    private double[] tauxImpositionParTranche = {0.0, 0.11, 0.3, 0.41, 0.45};
+    private final double[] tauxImpositionParTranche = {0.0, 0.11, 0.3, 0.41, 0.45};
 
     // Les limites des tranches pour la contribution exceptionnelle sur les hauts revenus
-    private int[] limitesTranchesCEHR = {0, 250000, 500000, 1000000, Integer.MAX_VALUE};
+    private final int[] limitesTranchesCEHR = {0, 250000, 500000, 1000000, Integer.MAX_VALUE};
 
     // Les taux de la contribution exceptionnelle sur les hauts revenus pour les celibataires
-    private double[] tauxCEHRCelibataire = {0.0, 0.03, 0.04, 0.04};
+    private final double[] tauxCEHRCelibataire = {0.0, 0.03, 0.04, 0.04};
 
     // Les taux de la contribution exceptionnelle sur les hauts revenus pour les couples
-    private double[] tauxCEHRCouple = {0.0, 0.0, 0.03, 0.04};
+    private final double[] tauxCEHRCouple = {0.0, 0.0, 0.03, 0.04};
 
-
-    // Abattement
-    private  int limiteAbattementMax = 14171;
-    private  int limiteAbattementMin = 495;
-    private double tauxAbattement = 0.1;
-
-    // Plafond de baisse maximal par demi part
-    private double plafondBaisseMaxDemiPart = 1759;
-
-    private double seuilDecoteDeclarantSeul = 1929;
-    private double seuilDecoteDeclarantCouple    = 3191;
-
-    private double decoteMaxDeclarantSeul = 873;
-    private double decoteMaxDeclarantCouple = 1444;
-    private double tauxDecote = 0.4525;
 
     // revenu net
     private int revenuNetDeclarant1;
@@ -176,7 +159,6 @@ public class SimulateurReusine {
             // EXIGENCE : EXG_IMPOT_02
             CalculAbattement(situationFamiliale);
 
-
             // parts déclarants
             // EXIG  : EXG_IMPOT_03
             CalculPartsDeclarants(situationFamiliale);
@@ -202,7 +184,7 @@ public class SimulateurReusine {
             // EXIGENCE : EXG_IMPOT_06
             CalculDecote();
 
-            return  (int) impotFoyerFiscal;
+            return (int) impotFoyerFiscal;
         }
         catch (Exception exception){
             System.out.println(exception.getMessage());
@@ -211,9 +193,13 @@ public class SimulateurReusine {
     }
 
     private void CalculAbattement(SituationFamiliale situationFamiliale){
+        double tauxAbattement = 0.1;
+        int limiteAbattementMin = 495;
+        int limiteAbattementMax = 14171;
         long abt1 = Math.round(revenuNetDeclarant1 * tauxAbattement);
         long abt2 = Math.round(revenuNetDeclarant2 * tauxAbattement);
 
+        // Abattement
         if (abt1 > limiteAbattementMax) {
             abt1 = limiteAbattementMax;
         }
@@ -246,20 +232,13 @@ public class SimulateurReusine {
 
     public void CalculPartsDeclarants(SituationFamiliale situationFamiliale){
         switch ( situationFamiliale ) {
-            case CELIBATAIRE:
+            case CELIBATAIRE, DIVORCE, VEUF:
                 nombrePartsDeclarant = 1;
                 break;
-            case MARIE:
+            case MARIE, PACSE:
                 nombrePartsDeclarant = 2;
                 break;
-            case DIVORCE:
-                nombrePartsDeclarant = 1;
-                break;
-            case VEUF:
-                nombrePartsDeclarant = 1;
-                break;
-            case PACSE:
-                nombrePartsDeclarant = 2;
+            default:
                 break;
         }
 
@@ -269,7 +248,7 @@ public class SimulateurReusine {
         // parts enfants à charge
         if ( this.nombreEnfants <= 2 ) {
             nombrePartsFoyerFiscal = nombrePartsDeclarant + this.nombreEnfants * 0.5;
-        } else if ( this.nombreEnfants > 2 ) {
+        } else {
             nombrePartsFoyerFiscal = nombrePartsDeclarant +  1.0 + ( this.nombreEnfants - 2 );
         }
 
@@ -363,6 +342,8 @@ public class SimulateurReusine {
     }
 
     public void VerificationBaisseImpot(){
+        // Plafond de baisse maximal par demi part
+        double plafondBaisseMaxDemiPart = 1759;
         double baisseImpot = impotDeclarant - impotFoyerFiscal;
 
         System.out.println( "Baisse d'impôt : " + baisseImpot );
@@ -384,15 +365,21 @@ public class SimulateurReusine {
 
     public void CalculDecote(){
         decote = 0;
+        double seuilDecoteDeclarantSeul = 1929;
+        double seuilDecoteDeclarantCouple = 3191;
+        double decoteMaxDeclarantSeul = 873;
+        double decoteMaxDeclarantCouple = 1444;
+        double tauxDecote = 0.4525;
+
         // decote
         if ( nombrePartsDeclarant == 1 ) {
-            if ( impotFoyerFiscal < seuilDecoteDeclarantSeul ) {
-                decote = decoteMaxDeclarantSeul - ( impotFoyerFiscal * tauxDecote );
+            if ( impotFoyerFiscal < seuilDecoteDeclarantSeul) {
+                decote = decoteMaxDeclarantSeul - ( impotFoyerFiscal * tauxDecote);
             }
         }
         if (  nombrePartsDeclarant == 2 ) {
-            if ( impotFoyerFiscal < seuilDecoteDeclarantCouple ) {
-                decote =  decoteMaxDeclarantCouple - ( impotFoyerFiscal * tauxDecote  );
+            if ( impotFoyerFiscal < seuilDecoteDeclarantCouple) {
+                decote =  decoteMaxDeclarantCouple - ( impotFoyerFiscal * tauxDecote);
             }
         }
         decote = Math.round( decote );
