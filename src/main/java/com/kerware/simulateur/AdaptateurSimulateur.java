@@ -4,7 +4,7 @@ import com.kerware.reusine.simualteur.SimulateurReusine;
 
 public class AdaptateurSimulateur implements ICalculateurImpot {
 
-    private SimulateurReusine simulateur;
+    private final SimulateurReusine simulateur;
 
     private int revenusNetDecl1 = 0;
     private int revenusNetDecl2 = 0;
