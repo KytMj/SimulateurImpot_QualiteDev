@@ -180,6 +180,10 @@
                 <configuration>
                     <configLocation>/src/main/resources/regles_iut_caen.xml</configLocation>
                     <failsOnError>true</failsOnError>
+                    <sourceDirectories>
+                        <sourceDirectory>com/kerware/reusine/simulateur</sourceDirectory>
+                        <sourceDirectory>/src/test/java/simulateur</sourceDirectory>
+                    </sourceDirectories>
                 </configuration>
             </plugin>
         </plugins>
